@@ -1,0 +1,426 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+typedef struct store
+{
+    float amount;
+    int id;
+    char name[50];
+    struct store *l;
+}STORE;
+STORE *ms=NULL;
+
+long long int phonenumber;
+typedef struct user
+{
+    long long int pn;
+    int id;
+    float quantity;
+    char name[50];
+    struct user *l;
+    int booked;
+    int dilvery;
+    float amount;
+}USER;
+USER *u=NULL;
+
+typedef struct cart
+{
+    long long int pn;
+    int pid;
+    char name[50];
+    struct user *l;
+}CART;
+CART *c=NULL;
+int count=0,countitem=0;
+
+
+void additems()
+{
+    STORE *temp,*new;
+    new=(STORE*)malloc(sizeof(STORE));
+    new->l=NULL;
+    printf(" enter the data without space \n  name :");
+    scanf("%s",new->name);
+    printf("\n  cost per kg : ");
+    scanf("%f",&new->amount);
+    new->id=count+1;
+    count++;
+    countitem++;
+    if(ms==NULL)
+    {
+        ms=new;
+    }
+    else{
+        temp=ms;
+        while(temp->l!=NULL)
+        {
+            temp=temp->l;
+        }
+        temp->l=new;
+    }
+
+}
+void display()
+{
+    STORE *n;
+    if(ms==NULL)
+    {
+        printf(" no records are found");
+        return;
+    }
+    n=ms;
+      printf("\n|PRODUCT ID|AMOUNT  |       NAME     |\n\n");
+    while(n!=NULL)
+    {
+
+        printf("|    %5d | %6.2f | %10s     |\n",n->id,n->amount,n->name);
+        n=n->l;
+    }
+}
+void update()
+{
+    int n;
+    display();
+    printf("\n enter the id to be updated: ");
+    scanf("%d",&n);
+    STORE *s=ms;
+
+    while(s!=NULL)
+    {
+        if(s->id==n)
+        {
+
+            printf(" enter the data with out space \nname :");
+            scanf("%s",s->name);
+            printf("\ncost per kg: ");
+            scanf("%f",&s->amount);
+            break;
+        }
+        s=s->l;
+    }
+    if(s==NULL)
+    {
+        printf(" entered id is not found\n");
+    }
+}
+
+void deleten()
+{
+    int Iid;
+    STORE *s=ms;
+    display();
+    if(ms==NULL)
+        printf(" \nno items are found\n");
+    else
+    {
+    printf(" enter the id of item  to be deleted: ");
+    scanf("%d",&Iid);
+    if(ms->id==Iid)
+    {
+        printf("ITEM %s is deleted\n",ms->name);
+        ms=ms->l;
+    }
+    else
+      {
+          s=ms;
+    while(s->l->id!=Iid && s!=NULL)
+        s=s->l;
+    if(s->l->id==Iid)
+    {
+     printf("ITEM %s is deleted\n",s->l->name);
+        s->l=s->l->l;
+        countitem--;
+    }
+    else
+        printf(" entered id is not found\n");
+      }
+    }
+
+
+
+}
+
+
+void buyitem()
+{
+    long long int phnum;
+    display();
+STORE *temp;
+int Byid,quant;
+int flag=0;
+printf("enter the product id u want to buy:\n");
+scanf("%d",&Byid);
+temp=ms;
+while(temp!=NULL)
+{
+    if(temp->id==Byid)
+
+    {
+      flag=1;
+      printf("item found\n");
+      printf("item name:%s\n",temp->name);
+      printf("price: %f\n ",temp->amount);
+      printf("\nenter the quantity you want to buy:\n");
+      scanf("%d",&quant);
+      USER* n=(USER*)malloc(sizeof(USER));
+      n->id=temp->id;
+      n->amount=temp->amount*quant;
+      n->quantity=quant;
+      strcpy(n->name,temp->name);
+
+      n->pn=phonenumber;
+      n->booked=0;
+      n->dilvery=0;
+      n->l=NULL;
+
+
+      if(u==NULL)
+      {
+          u=n;
+      }
+      else
+        {
+            USER *t=u;
+        while(t->l!=NULL)
+        {
+            t=t->l;
+        }
+        t->l=n;
+        }
+
+     break;
+    }
+    temp=temp->l;
+}
+if(flag==0)
+{
+    printf("\nItem not found\n");
+}
+printf("\nyour order is successfully added to the cart,if you wish to buy then book in the cart.\n");
+}
+void discart()
+{
+     int flag=0;
+    USER *n;
+    float cost=0;
+    if(u==NULL)
+    {
+        printf("\nno items added to the cart\n");
+        return;
+    }
+    n=u;
+
+    while(n!=NULL)
+    {
+
+        if(n->pn==phonenumber && n->booked==0){
+                if(flag==0)
+                {
+                    printf("\n|PRODUCT ID|AMOUNT  |      NAME      |\n");
+                    flag=1;
+                }
+
+        printf("|    %5d | %6.2f | %10s     |\n",n->id,n->amount,n->name);
+        cost=cost+n->amount;
+        }
+
+
+        n=n->l;
+    }
+    if(cost==0)
+    {
+        printf("\nno items added to the cart\n");
+    }
+    else{
+        printf("\ntotal cost:%f\n",cost);
+    }
+}
+void dilvary()
+{
+    int flag=0;
+    USER *n;
+    long long int pn;
+    float cost=0;
+    if(u==NULL)
+    {
+        printf("no items added to the cart\n");
+        return;
+    }
+    n=u;
+
+    while(n!=NULL)
+    {
+
+        if(n->booked==1&&n->dilvery==0){
+                if(flag==0)
+                {
+                   printf("\n|PRODUCT ID|AMOUNT  |       NAME     |phone number|\n");
+                   flag=1;
+                }
+         printf("|    %5d | %6.2f | %10s     |%ld      |\n",n->id,n->amount,n->name,n->pn);
+        }
+
+        n=n->l;
+    }
+   printf(" enter the your phone number to receive items:");
+   scanf("%d",&pn);
+     n=u;
+    while(n!=NULL)
+    {
+        if(n->booked==1&&n->dilvery==0&&n->pn==pn){
+        n->dilvery=1;
+        }
+        n=n->l;
+    }
+}
+
+void MangFut()
+{
+
+    int ch;
+    while(1){
+    printf("\nenter the choice:\n\n1:add items\n2:display items\n3:update item\n4:delete item\n5:log out as manager\n6: to dilvary\nchoice : ");
+    scanf("%d",&ch);
+    if(ch==1)
+    {
+        additems();
+    }
+    else if(ch==2)
+    {
+        display();
+    }
+    else if(ch==3)
+    {
+        update();
+    }
+    else if(ch==4)
+    {
+        deleten();
+    }
+    else if(ch==5)
+    {
+        return ;
+    }
+    else if(ch==6)
+    {
+        dilvary();
+    }
+    }
+}
+
+void removeitems()
+{
+     USER *n,*prev;
+    float cost=0;
+    if(u==NULL)
+    {
+        printf("no items added to the cart\n");
+        return;
+    }
+    n=u;
+      printf("\n|PRODUCT ID|AMOUNT  |QUANTITY|       NAME     |\n\n");
+    while(n!=NULL)
+    {
+        if(n->pn==phonenumber && n->booked==0)
+        {
+
+            n->booked=2;
+        }
+
+        n=n->l;
+    }
+
+}
+void bookitems()
+{
+     USER *n,*prev;
+    float cost=0;
+    if(u==NULL)
+    {
+        printf("no items added to the cart\n");
+        return;
+    }
+    n=u;
+    while(n!=NULL)
+    {
+        if(n->pn==phonenumber && n->booked==0)
+        {
+
+            n->booked=1;
+        }
+
+        n=n->l;
+    }
+
+}
+void user()
+{
+    int ch;
+    printf("enter your phone number:\n");
+    scanf("%10ld",&phonenumber);
+    while(1)
+    {
+    printf("\nenter your choice:\n\n1:add to cart\n2:cart  \n3:logout ");
+    printf("\nenter your choice:\n");
+    scanf("%d",&ch);
+    if(ch==1)
+    {
+        buyitem();
+
+    }
+    if(ch==2)
+    {
+        int c;
+        discart();
+        printf("\n1:book all items from the cart\n2:remove all items from the cart\n3:logout\n");
+        scanf("%d",&c);
+        if(c==1)
+        {
+            bookitems();
+        }
+        else if(c==2)
+        {
+            removeitems();
+        }
+        else{
+            return;
+        }
+
+
+    }
+
+
+    }
+
+}
+char pass[10]="sit143";
+
+int main()
+{
+    while(1){
+    int choice;
+    char passm[10];
+    printf("enter the choice:\n 1 : manager \n 2 : user\n");
+    scanf("%d",&choice);
+    if(choice==1)
+    {
+        printf("enter the password : ");
+        scanf("%s",passm);
+        if(strcmp(passm,pass)==0)
+        {
+            MangFut();
+        }
+        else{
+            printf("INCORRECT PASSWORD\n");
+        }
+    }
+    if(choice==2)
+    {
+        user();
+    }
+
+    }
+
+    return 0;
+}
